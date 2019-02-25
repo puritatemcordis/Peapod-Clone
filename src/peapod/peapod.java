@@ -175,14 +175,14 @@ public class peapod extends Application {
 
 			try
 			{
-				Scanner x = new Scanner(new File("./users.txt"));
+				Scanner x = new Scanner(new File("users.txt"));
 				x.useDelimiter("[,\n]");
 
 				while(x.hasNext() && !found)
 				{
 					tempUsername = x.next();
 					tempPassword = x.next();
-
+					
 					if(tempUsername.trim().equals(username.getText()) && tempPassword.trim().equals(password.getText()))
 					{
 						found = true;

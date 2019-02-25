@@ -1,2 +1,0 @@
-abby,hello
-zack,test
