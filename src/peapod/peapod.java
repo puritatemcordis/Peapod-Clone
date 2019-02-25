@@ -4,23 +4,31 @@
 
 package peapod;
 
-import java.text.DecimalFormat;
+import java.io.File;
 import java.util.Date;
+import java.util.Optional;
+import java.util.Scanner;
+
+import java.text.DecimalFormat;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.input.MouseEvent;
-
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -29,6 +37,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.text.Font; 
 
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.GridPane;
@@ -166,7 +175,7 @@ public class peapod extends Application {
 
 			try
 			{
-				Scanner x = new Scanner(new File("users.txt"));
+				Scanner x = new Scanner(new File("./users.txt"));
 				x.useDelimiter("[,\n]");
 
 				while(x.hasNext() && !found)
