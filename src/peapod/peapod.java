@@ -315,16 +315,14 @@ public class peapod extends Application {
 		
 		center.getChildren().addAll(mainV, greetingSP);
 	
-	
+		ScrollPane sp = new ScrollPane();
+		GridPane allGP = new GridPane();
+		allGP.setPadding(new Insets(20, 60, 20, 60));
+		allGP.setVgap(8);
+		allGP.setHgap(40);
 //=====================
 //		PROTEIN 
-//=====================
-		ScrollPane sp = new ScrollPane();
-		GridPane proteinGP = new GridPane();
-		proteinGP.setPadding(new Insets(20, 60, 20, 60));
-		proteinGP.setVgap(8);
-		proteinGP.setHgap(40);
-		
+//=====================		
 //		PROTEIN - Chicken
 		VBox chickenVB = new VBox();
 		
@@ -439,6 +437,10 @@ public class peapod extends Application {
 		salmonVB.getChildren().addAll(salmonV, salmonSP, salmonHB);
 		GridPane.setConstraints(salmonVB, 1, 0);
 		
+		
+//=====================
+//		VEGETABLES 
+//=====================
 //		VEGETABLES - Asparagus
 		VBox asparagusVB = new VBox();
 		
@@ -608,6 +610,9 @@ public class peapod extends Application {
 		breadVB.getChildren().addAll(breadV, breadSP, breadHB);
 		GridPane.setConstraints(breadVB, 0, 2);
 		
+//=====================
+//		BAKERY 
+//=====================
 //		BAKERY - muffin
 		VBox muffinVB = new VBox();
 		
@@ -664,13 +669,11 @@ public class peapod extends Application {
 		muffinVB.getChildren().addAll(muffinV, muffinSP, muffinHB);
 		GridPane.setConstraints(muffinVB, 1, 2);
 		
-		proteinGP.getChildren().addAll(chickenVB, salmonVB, asparagusVB, bsVB, breadVB, muffinVB);
+		allGP.getChildren().addAll(chickenVB, salmonVB, asparagusVB, bsVB, breadVB, muffinVB);
 		
-		sp.setContent(proteinGP);
+		sp.setContent(allGP);
 		
 //		Border Pane
-//		ScrollPane bpSP = new ScrollPane(); TODO: FIX SCROLLING
-//		bpSP.setContent(bp);
 		BorderPane bp = new BorderPane();
 		bp.setTop(navbar);
 		bp.setLeft(sidebar);
@@ -696,9 +699,78 @@ public class peapod extends Application {
 		btn2.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent e) {
+				ScrollPane sp = new ScrollPane();
+				GridPane tempGP = new GridPane();
+				tempGP.setPadding(new Insets(20, 60, 20, 60));
+				tempGP.setVgap(8);
+				tempGP.setHgap(40);
+				
+				GridPane.setConstraints(chickenVB, 0, 0);
+				GridPane.setConstraints(salmonVB, 1, 0);
+				GridPane.setConstraints(asparagusVB, 0, 1);
+				GridPane.setConstraints(bsVB, 1, 1);
+				GridPane.setConstraints(breadVB, 0, 2);
+				GridPane.setConstraints(muffinVB, 1, 2);
+				
+				tempGP.getChildren().addAll(chickenVB, salmonVB, asparagusVB, bsVB, breadVB, muffinVB);
+				
+				sp.setContent(tempGP);
+				
 				bp.setCenter(sp);
 				window.setScene(scene);
 			}
+		});
+		
+//		IMAGEVIEW FROM SIDEBAR TO CHANGE BORDERPANE
+		proteinV.setOnMouseClicked(e->{
+			GridPane proteinGP = new GridPane();
+			proteinGP.setPadding(new Insets(20, 60, 20, 60));
+			proteinGP.setVgap(8);
+			proteinGP.setHgap(40);
+			
+			GridPane.setConstraints(chickenVB, 0, 0);
+			GridPane.setConstraints(salmonVB, 1, 0);
+			
+			proteinGP.getChildren().addAll(chickenVB, salmonVB);
+			
+			sp.setContent(proteinGP);
+			
+			bp.setCenter(sp);
+			window.setScene(scene);
+		});
+		
+		greensV.setOnMouseClicked(e->{
+			GridPane greensGP = new GridPane();
+			greensGP.setPadding(new Insets(20, 60, 20, 60));
+			greensGP.setVgap(8);
+			greensGP.setHgap(40);
+			
+			GridPane.setConstraints(asparagusVB, 0, 0);
+			GridPane.setConstraints(bsVB, 1, 0);
+			
+			greensGP.getChildren().addAll(asparagusVB, bsVB);
+			
+			sp.setContent(greensGP);
+			
+			bp.setCenter(sp);
+			window.setScene(scene);
+		});
+		
+		bakeryV.setOnMouseClicked(e->{
+			GridPane bakeryGP = new GridPane();
+			bakeryGP.setPadding(new Insets(20, 60, 20, 60));
+			bakeryGP.setVgap(8);
+			bakeryGP.setHgap(40);
+			
+			GridPane.setConstraints(breadVB, 0, 0);
+			GridPane.setConstraints(muffinVB, 1, 0);
+			
+			bakeryGP.getChildren().addAll(breadVB, muffinVB);
+			
+			sp.setContent(bakeryGP);
+			
+			bp.setCenter(sp);
+			window.setScene(scene);
 		});
 	}
 	
