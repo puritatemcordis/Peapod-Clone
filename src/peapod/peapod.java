@@ -48,6 +48,9 @@ import javafx.scene.layout.HBox;
 
 public class peapod extends Application {
 	
+	//Declare a new fileIO for transaction log.
+	fileIO wrFile = new fileIO();
+	
 	Text clock;
 	Stage window;
 	
@@ -162,7 +165,8 @@ public class peapod extends Application {
 			// Convert the result to a username-password-pair when the login button is clicked.
 			dialog.setResultConverter(dialogButton -> {
 			    if (dialogButton == loginButtonType) {
-				return new Pair<>(username.getText(), password.getText());
+			    	wrFile.wrTransactionData("LOGIN: " + username.getText() + " || " + password.getText());
+			    	return new Pair<>(username.getText(), password.getText());
 			    }
 			    return null;
 			});
@@ -195,15 +199,17 @@ public class peapod extends Application {
 				e1.printStackTrace();
 			}
 
-			if (found == true)
+			if (found == true) {
 				user.setText(username.getText());
-			else {
+				wrFile.wrTransactionData("LOGIN: SUCCESS");
+			}else {
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.setTitle("Error User Not Found!");
 				alert.setHeaderText("Error User Not Found!");
 				alert.setContentText("Please try again.");
 
 				alert.showAndWait();
+				wrFile.wrTransactionData("ERROR: USER NOT FOUND");
 			}
 
 		    }
@@ -356,6 +362,7 @@ public class peapod extends Application {
 					cNum--;
 					calculateAmount(cNum, 4.99, chickenAmount, cartTotal, '-');
 				}
+				wrFile.wrTransactionData("CHICKEN- || NEW: " + cNum);
 			}
 		});
 		chickenD.setPrefWidth(25);
@@ -365,6 +372,7 @@ public class peapod extends Application {
 			public void handle(ActionEvent e) {
 				cNum++;
 				calculateAmount(cNum, 4.99, chickenAmount, cartTotal, '+');
+				wrFile.wrTransactionData("CHICKEN+ || NEW: " + cNum);
 			}
 		});
 		chickenI.setPrefWidth(25);
@@ -411,6 +419,7 @@ public class peapod extends Application {
 					sNum--;
 					calculateAmount(sNum, 10.99, salmonAmount, cartTotal, '-');
 				}
+				wrFile.wrTransactionData("SALMON- || NEW: " + sNum);
 			}
 		});
 		salmonD.setPrefWidth(25);
@@ -420,6 +429,7 @@ public class peapod extends Application {
 			public void handle(ActionEvent e) {
 				sNum++;
 				calculateAmount(sNum, 10.99, salmonAmount, cartTotal, '+');
+				wrFile.wrTransactionData("SALMON+ || NEW: " + sNum);
 			}
 		});
 		salmonI.setPrefWidth(25);
@@ -470,6 +480,7 @@ public class peapod extends Application {
 					aNum--;
 					calculateAmount(aNum, 2.99, asparagusAmount, cartTotal, '-');
 				}
+				wrFile.wrTransactionData("ASPARAGUS- || NEW: " + aNum);
 			}
 		});
 		asparagusD.setPrefWidth(25);
@@ -479,6 +490,7 @@ public class peapod extends Application {
 			public void handle(ActionEvent e) {
 				aNum++;
 				calculateAmount(aNum, 2.99, asparagusAmount, cartTotal, '+');
+				wrFile.wrTransactionData("ASPARAGUS+ || NEW: " + aNum);
 			}
 		});
 		asparagusI.setPrefWidth(25);
@@ -526,6 +538,7 @@ public class peapod extends Application {
 					bsNum--;
 					calculateAmount(bsNum, 2.50, bsAmount, cartTotal, '-');
 				}
+				wrFile.wrTransactionData("SPROUTS- || NEW: " + bsNum);
 			}
 		});
 		bsD.setPrefWidth(25);
@@ -535,6 +548,7 @@ public class peapod extends Application {
 			public void handle(ActionEvent e) {
 				bsNum++;
 				calculateAmount(bsNum, 2.50, bsAmount, cartTotal, '+');
+				wrFile.wrTransactionData("SPROUTS+ || NEW: " + bsNum);
 			}
 		});
 		bsI.setPrefWidth(25);
@@ -581,6 +595,7 @@ public class peapod extends Application {
 					bNum--;
 					calculateAmount(bNum, 1.99, breadAmount, cartTotal, '-');
 				}
+				wrFile.wrTransactionData("BREAD- || NEW: " + bNum);
 			}
 		});
 		breadD.setPrefWidth(25);
@@ -590,6 +605,7 @@ public class peapod extends Application {
 			public void handle(ActionEvent e) {
 				bNum++;
 				calculateAmount(bNum, 1.99, breadAmount, cartTotal, '+');
+				wrFile.wrTransactionData("BREAD+ || NEW: " + bNum);
 			}
 		});
 		breadI.setPrefWidth(25);
@@ -639,6 +655,7 @@ public class peapod extends Application {
 					mNum--;
 					calculateAmount(mNum, 3.69, muffinAmount, cartTotal, '-');
 				}
+				wrFile.wrTransactionData("MUFFIN- || NEW: " + mNum);
 			}
 		});
 		muffinD.setPrefWidth(25);
@@ -648,6 +665,7 @@ public class peapod extends Application {
 			public void handle(ActionEvent e) {
 				mNum++;
 				calculateAmount(mNum, 3.69, muffinAmount, cartTotal, '+');
+				wrFile.wrTransactionData("MUFFIN+ || NEW: " + mNum);
 			}
 		});
 		muffinI.setPrefWidth(25);
@@ -681,6 +699,7 @@ public class peapod extends Application {
 			public void handle(ActionEvent e) {
 				bp.setCenter(center);
 				window.setScene(scene);
+				wrFile.wrTransactionData("HOME");
 			}
 		});
 		
@@ -706,6 +725,7 @@ public class peapod extends Application {
 				
 				bp.setCenter(sp);
 				window.setScene(scene);
+				wrFile.wrTransactionData("BROWSE ALL");
 			}
 		});
 		
@@ -725,6 +745,8 @@ public class peapod extends Application {
 			
 			bp.setCenter(sp);
 			window.setScene(scene);
+			
+			wrFile.wrTransactionData("PROTEIN");
 		});
 		
 		greensV.setOnMouseClicked(e->{
@@ -742,6 +764,8 @@ public class peapod extends Application {
 			
 			bp.setCenter(sp);
 			window.setScene(scene);
+			
+			wrFile.wrTransactionData("VEGETABLES");
 		});
 		
 		bakeryV.setOnMouseClicked(e->{
@@ -759,6 +783,8 @@ public class peapod extends Application {
 			
 			bp.setCenter(sp);
 			window.setScene(scene);
+			
+			wrFile.wrTransactionData("BAKERY");
 		});
 	}
 	
