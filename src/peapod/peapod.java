@@ -300,7 +300,6 @@ public class peapod extends Application {
 		ImageView mainV = new ImageView(main);
 		mainV.setFitWidth(.666*height);
 		mainV.setFitHeight(428);
-//		mainV.setPreserveRatio(true);
 		mainV.setSmooth(true);
 		mainV.setCache(true);
 		
@@ -378,7 +377,6 @@ public class peapod extends Application {
 		chickenHB.getChildren().addAll(cr1, chickenD, chickenAmount, chickenI, cr2);
 		
 		chickenVB.getChildren().addAll(chickenV, chickenSP, chickenHB);
-		GridPane.setConstraints(chickenVB, 0, 0);
 		
 //		PROTEIN - Salmon
 		VBox salmonVB = new VBox();
@@ -386,7 +384,6 @@ public class peapod extends Application {
 		Image salmon = new Image("/resources/salmon-t.png");
 		ImageView salmonV = new ImageView(salmon);
 		salmonV.setFitWidth(250);
-//		salmonnV.setFitHeight();
 		salmonV.setPreserveRatio(true);
 		salmonV.setSmooth(true);
 		salmonV.setCache(true);
@@ -435,7 +432,6 @@ public class peapod extends Application {
 		salmonHB.getChildren().addAll(sr1, salmonD, salmonAmount, salmonI, sr2);
 		
 		salmonVB.getChildren().addAll(salmonV, salmonSP, salmonHB);
-		GridPane.setConstraints(salmonVB, 1, 0);
 		
 		
 //=====================
@@ -495,7 +491,6 @@ public class peapod extends Application {
 		asparagusHB.getChildren().addAll(ar1, asparagusD, asparagusAmount, asparagusI, ar2);
 		
 		asparagusVB.getChildren().addAll(asparagusV, asparagusSP, asparagusHB);
-		GridPane.setConstraints(asparagusVB, 0, 1);
 		
 //		VEGETABLES - Brussel Sprouts
 		
@@ -552,7 +547,6 @@ public class peapod extends Application {
 		bsHB.getChildren().addAll(bsr1, bsD, bsAmount, bsI, bsr2);
 		
 		bsVB.getChildren().addAll(bsV, bsSP, bsHB);
-		GridPane.setConstraints(bsVB, 1, 1);
 		
 //		BAKERY - bread
 		VBox breadVB = new VBox();
@@ -608,7 +602,6 @@ public class peapod extends Application {
 		breadHB.getChildren().addAll(br1, breadD, breadAmount, breadI, br2);
 		
 		breadVB.getChildren().addAll(breadV, breadSP, breadHB);
-		GridPane.setConstraints(breadVB, 0, 2);
 		
 //=====================
 //		BAKERY 
@@ -667,11 +660,6 @@ public class peapod extends Application {
 		muffinHB.getChildren().addAll(mr1, muffinD, muffinAmount, muffinI, mr2);
 		
 		muffinVB.getChildren().addAll(muffinV, muffinSP, muffinHB);
-		GridPane.setConstraints(muffinVB, 1, 2);
-		
-		allGP.getChildren().addAll(chickenVB, salmonVB, asparagusVB, bsVB, breadVB, muffinVB);
-		
-		sp.setContent(allGP);
 		
 //		Border Pane
 		BorderPane bp = new BorderPane();
