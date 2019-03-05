@@ -4,6 +4,8 @@
 
 package peapod;
 
+import java.util.*;
+
 import java.io.File;
 import java.util.Date;
 import java.util.Optional;
@@ -24,10 +26,13 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -45,6 +50,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+
+import javafx.beans.value.ChangeListener;
 
 public class peapod extends Application {
 	
@@ -67,8 +74,20 @@ public class peapod extends Application {
 	int bNum = 0; //number of bread
 	int mNum = 0; //number of muffins
 	
+	String selectedTime = ""; //selected delivery time 
+	String selectedDate = ""; //selected delivery date
+	TextField username = new TextField(); //username
+	
 	@Override
 	public void start(Stage primaryStage) throws Exception{
+		Map<String, Integer> userCart = new HashMap<String, Integer>();
+		userCart.put("Chicken", 0);
+		userCart.put("Salmon", 0);
+		userCart.put("Asparagus", 0);
+		userCart.put("Brussels Sprouts", 0);
+		userCart.put("Bread", 0);
+		userCart.put("Muffins", 0);
+		
 		window = primaryStage;
 		window.setTitle("PeaPod Clone");
 		
@@ -138,7 +157,6 @@ public class peapod extends Application {
 			grid.setVgap(10);
 			grid.setPadding(new Insets(20, 150, 10, 10));
 
-			TextField username = new TextField();
 			username.setPromptText("Username");
 			PasswordField password = new PasswordField();
 			password.setPromptText("Password");
@@ -359,6 +377,7 @@ public class peapod extends Application {
 			@Override
 			public void handle(ActionEvent e) {
 				if(cNum > 0) {
+					userCart.put("Chicken", userCart.get("Chicken")-1);
 					cNum--;
 					calculateAmount(cNum, 4.99, chickenAmount, cartTotal, '-');
 				}
@@ -370,6 +389,7 @@ public class peapod extends Application {
 		chickenI.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
+				userCart.put("Chicken", userCart.get("Chicken")+1);
 				cNum++;
 				calculateAmount(cNum, 4.99, chickenAmount, cartTotal, '+');
 				wrFile.wrTransactionData("CHICKEN+ || NEW: " + cNum);
@@ -416,6 +436,7 @@ public class peapod extends Application {
 			@Override
 			public void handle(ActionEvent e) {
 				if(sNum > 0) {
+					userCart.put("Salmon", userCart.get("Salmon")-1);
 					sNum--;
 					calculateAmount(sNum, 10.99, salmonAmount, cartTotal, '-');
 				}
@@ -427,6 +448,7 @@ public class peapod extends Application {
 		salmonI.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
+				userCart.put("Salmon", userCart.get("Salmon")+1);
 				sNum++;
 				calculateAmount(sNum, 10.99, salmonAmount, cartTotal, '+');
 				wrFile.wrTransactionData("SALMON+ || NEW: " + sNum);
@@ -477,6 +499,7 @@ public class peapod extends Application {
 			@Override
 			public void handle(ActionEvent e) {
 				if(aNum > 0) {
+					userCart.put("Asparagus", userCart.get("Asparagus")-1);
 					aNum--;
 					calculateAmount(aNum, 2.99, asparagusAmount, cartTotal, '-');
 				}
@@ -488,6 +511,7 @@ public class peapod extends Application {
 		asparagusI.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
+				userCart.put("Asparagus", userCart.get("Asparagus")+1);
 				aNum++;
 				calculateAmount(aNum, 2.99, asparagusAmount, cartTotal, '+');
 				wrFile.wrTransactionData("ASPARAGUS+ || NEW: " + aNum);
@@ -535,6 +559,7 @@ public class peapod extends Application {
 			@Override
 			public void handle(ActionEvent e) {
 				if(bsNum > 0) {
+					userCart.put("Brussels Sprouts", userCart.get("Brussels Sprouts")-1);
 					bsNum--;
 					calculateAmount(bsNum, 2.50, bsAmount, cartTotal, '-');
 				}
@@ -546,6 +571,7 @@ public class peapod extends Application {
 		bsI.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
+				userCart.put("Brussels Sprouts", userCart.get("Brussels Sprouts")+1);
 				bsNum++;
 				calculateAmount(bsNum, 2.50, bsAmount, cartTotal, '+');
 				wrFile.wrTransactionData("SPROUTS+ || NEW: " + bsNum);
@@ -592,6 +618,7 @@ public class peapod extends Application {
 			@Override
 			public void handle(ActionEvent e) {
 				if(bNum > 0) {
+					userCart.put("Bread", userCart.get("Bread")-1);
 					bNum--;
 					calculateAmount(bNum, 1.99, breadAmount, cartTotal, '-');
 				}
@@ -603,6 +630,7 @@ public class peapod extends Application {
 		breadI.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
+				userCart.put("Bread", userCart.get("Bread")+1);
 				bNum++;
 				calculateAmount(bNum, 1.99, breadAmount, cartTotal, '+');
 				wrFile.wrTransactionData("BREAD+ || NEW: " + bNum);
@@ -652,6 +680,7 @@ public class peapod extends Application {
 			@Override
 			public void handle(ActionEvent e) {
 				if(mNum > 0) {
+					userCart.put("Muffins", userCart.get("Muffins")-1);
 					mNum--;
 					calculateAmount(mNum, 3.69, muffinAmount, cartTotal, '-');
 				}
@@ -663,6 +692,7 @@ public class peapod extends Application {
 		muffinI.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
+				userCart.put("Muffins", userCart.get("Muffins")+1);
 				mNum++;
 				calculateAmount(mNum, 3.69, muffinAmount, cartTotal, '+');
 				wrFile.wrTransactionData("MUFFIN+ || NEW: " + mNum);
@@ -726,6 +756,96 @@ public class peapod extends Application {
 				bp.setCenter(sp);
 				window.setScene(scene);
 				wrFile.wrTransactionData("BROWSE ALL");
+			}
+		});
+		
+//=========================
+//		DELIVERY TIME
+//=========================
+		btn3.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				ScrollPane deliverySP = new ScrollPane();
+				GridPane deliveryGP = new GridPane();
+				deliveryGP.setPadding(new Insets(20, 60, 20, 60));
+				deliveryGP.setVgap(20);
+				deliveryGP.setHgap(40);
+				
+				Label dateLabel = new Label("Date:");
+				GridPane.setConstraints(dateLabel, 0, 0);
+				
+//				Date Choice Box
+				ChoiceBox<String> dateCB = new ChoiceBox<>();
+				
+				dateCB.getItems().addAll("Monday, March 4", "Tuesday, March 5", "Wednesday, March 6", "Thursday, March 7", "Friday, March 8", "Saturday, March 9", "Sunday, March 10");
+				dateCB.setValue("Monday, March 4");
+				GridPane.setConstraints(dateCB, 1,0);
+				
+//				Times Radio Button
+				VBox radio = new VBox();
+				radio.setSpacing(5);
+				ToggleGroup times = new ToggleGroup();
+				RadioButton morning = new RadioButton("9:00 A.M.");
+				morning.setToggleGroup(times);
+				morning.setUserData("9:00 A.M.");
+				RadioButton noon = new RadioButton("12:00 P.M.");
+				noon.setToggleGroup(times);
+				noon.setUserData("12:00 P.M.");
+				RadioButton afternoon = new RadioButton("3:00 P.M.");
+				afternoon.setToggleGroup(times);
+				afternoon.setUserData("3:00 P.M.");
+				radio.getChildren().addAll(morning, noon, afternoon);
+				GridPane.setConstraints(radio, 1, 1);
+				
+				Button checkout = new Button("Checkout");
+				checkout.setOnAction(new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(ActionEvent e) {
+						selectedTime = dateCB.getValue();
+						selectedDate = times.getSelectedToggle().getUserData().toString();
+						System.out.println(
+								"Username: " 	  + username.getText() + "\n" + 
+								"Selected Time: " + selectedTime 	   + "\n" + 
+								"Selected Date: " + selectedDate 	   + "\n" +
+								"Cart: "		  + userCart		   + "\n" +
+								"Total: "		  + "$"+total		   + "\n"
+						);
+						
+//						Confirmation
+						Alert confirmation = new Alert(
+								AlertType.CONFIRMATION,
+								"Username: " 	  + username.getText() + "\n" + 
+										"Selected Time: " + selectedTime 	   + "\n" + 
+										"Selected Date: " + selectedDate 	   + "\n" +
+										"Cart: "		  + userCart		   + "\n" +
+										"Total: "		  + "$"+total		   + "\n",
+								ButtonType.FINISH, ButtonType.CANCEL);
+						confirmation.setTitle("Checkout Confirmation!");
+						confirmation.setHeaderText("Checkout Confirmation");
+						confirmation.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+						confirmation.showAndWait().ifPresent(response -> {
+							if(response == ButtonType.FINISH) {
+								Alert submitted = new Alert(
+										AlertType.NONE,
+										"Order Submitted!",
+										ButtonType.OK);
+								submitted.setTitle("Order Submitted!");
+								submitted.setHeaderText("Order Submitted");
+								submitted.showAndWait().ifPresent(resp -> {
+									System.exit(0);
+								});
+								System.exit(0);
+							}
+						});;
+					}
+				});
+				GridPane.setConstraints(checkout, 1, 2);
+
+				deliveryGP.getChildren().addAll(dateLabel, dateCB, radio, checkout);
+				deliverySP.setContent(deliveryGP);
+				
+				bp.setCenter(deliverySP);
+				window.setScene(scene);
 			}
 		});
 		
