@@ -814,11 +814,11 @@ public class peapod extends Application {
 //						Confirmation
 						Alert confirmation = new Alert(
 								AlertType.CONFIRMATION,
-								"Username: " 	  + username.getText() + "\n" + 
-										"Selected Time: " + selectedTime 	   + "\n" + 
-										"Selected Date: " + selectedDate 	   + "\n" +
-										"Cart: "		  + userCart		   + "\n" +
-										"Total: "		  + "$"+total		   + "\n",
+										"Username: " 	  + username.getText() 					   + "\n" + 
+										"Selected Time: " + selectedTime 	   					   + "\n" + 
+										"Selected Date: " + selectedDate 	   					   + "\n" +
+										"Cart: "		  + userCart		   					   + "\n" +
+										"Total: "		  + "$" + totalFormat.format(total)		   + "\n",
 								ButtonType.FINISH, ButtonType.CANCEL);
 						confirmation.setTitle("Checkout Confirmation!");
 						confirmation.setHeaderText("Checkout Confirmation");
