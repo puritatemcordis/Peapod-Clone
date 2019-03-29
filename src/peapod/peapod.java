@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import java.text.DecimalFormat;
 
@@ -803,13 +804,13 @@ public class peapod extends Application {
 					public void handle(ActionEvent e) {
 						selectedTime = dateCB.getValue();
 						selectedDate = times.getSelectedToggle().getUserData().toString();
-						System.out.println(
+						String order = 
 								"Username: " 	  + username.getText() + "\n" + 
 								"Selected Time: " + selectedTime 	   + "\n" + 
 								"Selected Date: " + selectedDate 	   + "\n" +
 								"Cart: "		  + userCart		   + "\n" +
-								"Total: "		  + "$"+total		   + "\n"
-						);
+								"Total: "		  + "$"+total		   + "\n";
+						
 						
 //						Confirmation
 						Alert confirmation = new Alert(
@@ -820,6 +821,10 @@ public class peapod extends Application {
 										"Cart: "		  + userCart		   					   + "\n" +
 										"Total: "		  + "$" + totalFormat.format(total)		   + "\n",
 								ButtonType.FINISH, ButtonType.CANCEL);
+//						SOCKET CODE
+						socketUtils.sendMessage(order);
+						socketUtils.closeSocket();
+						System.out.println("Socket Server Closed...");
 						confirmation.setTitle("Checkout Confirmation!");
 						confirmation.setHeaderText("Checkout Confirmation");
 						confirmation.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
@@ -834,7 +839,6 @@ public class peapod extends Application {
 								submitted.showAndWait().ifPresent(resp -> {
 									System.exit(0);
 								});
-								System.exit(0);
 							}
 						});;
 					}
@@ -951,6 +955,9 @@ public class peapod extends Application {
     }
 
 	public static void main(String[] args) {
+//		OPENS SOCKET SEREVER
+		socketUtils.socketConnect();
+		System.out.println("Socket Server Opened...");
 		launch(args);
 	}
 
