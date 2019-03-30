@@ -25,6 +25,7 @@ public class socketUtils
 		
 		try 
 		{
+//			config.txt must be outside of package, but inside source
 			File file = new File("config.txt");
 	        if (file.exists())
 	        {
@@ -38,7 +39,6 @@ public class socketUtils
 	        }
 	        else
 	        {
-//	           InetAddress tempAddress = InetAddress.getLocalHost();
 	           ipAddress  = "localhost";
 	           portNumber = 3333;
 	        }

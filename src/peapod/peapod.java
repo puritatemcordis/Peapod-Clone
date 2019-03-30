@@ -7,9 +7,6 @@ package peapod;
 import java.util.*;
 
 import java.io.File;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import java.text.DecimalFormat;
@@ -788,59 +785,72 @@ public class peapod extends Application {
 				ToggleGroup times = new ToggleGroup();
 				RadioButton morning = new RadioButton("9:00 A.M.");
 				morning.setToggleGroup(times);
-				morning.setUserData("9:00 A.M.");
+				morning.setUserData("1");
 				RadioButton noon = new RadioButton("12:00 P.M.");
 				noon.setToggleGroup(times);
-				noon.setUserData("12:00 P.M.");
+				noon.setUserData("2");
 				RadioButton afternoon = new RadioButton("3:00 P.M.");
 				afternoon.setToggleGroup(times);
-				afternoon.setUserData("3:00 P.M.");
+				afternoon.setUserData("3");
 				radio.getChildren().addAll(morning, noon, afternoon);
 				GridPane.setConstraints(radio, 1, 1);
 				
 				Button checkout = new Button("Checkout");
-				checkout.setOnAction(new EventHandler<ActionEvent>() {
+				checkout.setOnAction(new EventHandler<ActionEvent>() { 
 					@Override
 					public void handle(ActionEvent e) {
-						selectedTime = dateCB.getValue();
-						selectedDate = times.getSelectedToggle().getUserData().toString();
-						String order = 
-								"Username: " 	  + username.getText() + "\n" + 
-								"Selected Time: " + selectedTime 	   + "\n" + 
-								"Selected Date: " + selectedDate 	   + "\n" +
-								"Cart: "		  + userCart		   + "\n" +
-								"Total: "		  + "$"+total		   + "\n";
-						
-						
-//						Confirmation
-						Alert confirmation = new Alert(
-								AlertType.CONFIRMATION,
-										"Username: " 	  + username.getText() 					   + "\n" + 
-										"Selected Time: " + selectedTime 	   					   + "\n" + 
-										"Selected Date: " + selectedDate 	   					   + "\n" +
-										"Cart: "		  + userCart		   					   + "\n" +
-										"Total: "		  + "$" + totalFormat.format(total)		   + "\n",
-								ButtonType.FINISH, ButtonType.CANCEL);
-//						SOCKET CODE
-						socketUtils.sendMessage(order);
-						socketUtils.closeSocket();
-						System.out.println("Socket Server Closed...");
-						confirmation.setTitle("Checkout Confirmation!");
-						confirmation.setHeaderText("Checkout Confirmation");
-						confirmation.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-						confirmation.showAndWait().ifPresent(response -> {
-							if(response == ButtonType.FINISH) {
-								Alert submitted = new Alert(
-										AlertType.NONE,
-										"Order Submitted!",
-										ButtonType.OK);
-								submitted.setTitle("Order Submitted!");
-								submitted.setHeaderText("Order Submitted");
-								submitted.showAndWait().ifPresent(resp -> {
-									System.exit(0);
-								});
-							}
-						});;
+						if(!username.getText().trim().isEmpty()) {
+							selectedTime = dateCB.getValue();
+							selectedDate = times.getSelectedToggle().getUserData().toString();
+							String selected = (String) times.getSelectedToggle().getUserData();
+							//order of order: action | username | truck # | total spent | muffins | salmon | asparagus | chicken | brussel sprouts | bread 
+							String order =  "TRANSACTION|"+ username.getText() + "|" + selected + "|" + totalFormat.format(total) + "|" + userCart.values();
+							order = order.replace("[", "");
+							order = order.replace("]", "");
+							order = order.replace(",", "|");
+							order = order.replaceAll("\\s+", "");
+							System.out.println(order);
+							
+//							SOCKET CODE
+//							socketUtils.sendMessage(order);
+//							socketUtils.closeSocket();
+							System.out.println("Socket Server Closed...");
+							
+//							Confirmation
+							Alert confirmation = new Alert(
+									AlertType.CONFIRMATION,
+											"Username: " 	  + username.getText() 					   + "\n" + 
+											"Selected Time: " + selectedTime 	   					   + "\n" + 
+											"Selected Date: " + selectedDate 	   					   + "\n" +
+											"Cart: "		  + userCart		   					   + "\n" +
+											"Total: "		  + "$" + totalFormat.format(total)		   + "\n",
+									ButtonType.FINISH, ButtonType.CANCEL);
+							
+							confirmation.setTitle("Checkout Confirmation!");
+							confirmation.setHeaderText("Checkout Confirmation");
+							confirmation.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+							confirmation.showAndWait().ifPresent(response -> {
+								if(response == ButtonType.FINISH) {
+									Alert submitted = new Alert(
+											AlertType.NONE,
+											"Order Submitted!",
+											ButtonType.OK);
+									submitted.setTitle("Order Submitted!");
+									submitted.setHeaderText("Order Submitted");
+									submitted.showAndWait().ifPresent(resp -> {
+										System.exit(0);
+									});
+								}
+							});
+						} else {
+							Alert loginerr = new Alert(
+									AlertType.ERROR,
+									"You must login to checkout!",
+									ButtonType.OK);
+							loginerr.setTitle("Login Error");
+							loginerr.setHeaderText("Login Error");
+							loginerr.showAndWait();
+						}
 					}
 				});
 				GridPane.setConstraints(checkout, 1, 2);
@@ -956,7 +966,7 @@ public class peapod extends Application {
 
 	public static void main(String[] args) {
 //		OPENS SOCKET SEREVER
-		socketUtils.socketConnect();
+//		socketUtils.socketConnect();
 		System.out.println("Socket Server Opened...");
 		launch(args);
 	}
