@@ -59,8 +59,8 @@ public class peapod extends Application {
 	Text clock;
 	Stage window;
 	
-	int height = 1000;
-	int width = 800;
+	int height = 1100;
+	int width = 853;
 	
 	double total = 0.00; //cart total
 	DecimalFormat totalFormat = new DecimalFormat("#0.00");
@@ -309,7 +309,18 @@ public class peapod extends Application {
 		bakeryV.setSmooth(true);
 		bakeryV.setCache(true);
 		
-		sidebar.getChildren().addAll(proteinV, greensV, bakeryV);
+		Button exitButton = new Button("Exit");
+		exitButton.setMinWidth(.33*height);
+		exitButton.setFont(Font.font("Verdana", 17));
+		exitButton.setOnAction(new EventHandler <ActionEvent>() {
+			@Override
+			public void handle(ActionEvent e) {
+				
+				System.exit(0);
+			}		
+		});
+		
+		sidebar.getChildren().addAll(proteinV, greensV, bakeryV, exitButton);
 		
 //		Center display
 //=====================
@@ -321,7 +332,7 @@ public class peapod extends Application {
 		Image main = new Image("/resources/main.png");
 		ImageView mainV = new ImageView(main);
 		mainV.setFitWidth(.666*height);
-		mainV.setFitHeight(428);
+		mainV.setFitHeight(500);
 		mainV.setSmooth(true);
 		mainV.setCache(true);
 		
@@ -803,8 +814,8 @@ public class peapod extends Application {
 							selectedTime = dateCB.getValue();
 							selectedDate = times.getSelectedToggle().getUserData().toString();
 							String selected = (String) times.getSelectedToggle().getUserData();
-							//order of order: action | username | truck # | total spent | muffins | salmon | asparagus | chicken | brussel sprouts | bread 
-							String order =  "TRANSACTION|"+ username.getText() + "|" + selected + "|" + totalFormat.format(total) + "|" + userCart.values();
+							//order of order: action | username | truck # | muffins | salmon | asparagus | chicken | brussel sprouts | bread 
+							String order =  "TRANSACTION|"+ username.getText() + "|" + selected + "|" + userCart.values();
 							order = order.replace("[", "");
 							order = order.replace("]", "");
 							order = order.replace(",", "|");
@@ -812,9 +823,7 @@ public class peapod extends Application {
 							System.out.println(order);
 							
 //							SOCKET CODE
-//							socketUtils.sendMessage(order);
-//							socketUtils.closeSocket();
-							System.out.println("Socket Server Closed...");
+							socketUtils.sendMessage(order);
 							
 //							Confirmation
 							Alert confirmation = new Alert(
@@ -838,6 +847,9 @@ public class peapod extends Application {
 									submitted.setTitle("Order Submitted!");
 									submitted.setHeaderText("Order Submitted");
 									submitted.showAndWait().ifPresent(resp -> {
+										socketUtils.sendMessage("QUIT");
+										socketUtils.closeSocket();
+										System.out.println("Socket Server Closed...");
 										System.exit(0);
 									});
 								}
@@ -966,7 +978,7 @@ public class peapod extends Application {
 
 	public static void main(String[] args) {
 //		OPENS SOCKET SEREVER
-//		socketUtils.socketConnect();
+		socketUtils.socketConnect();
 		System.out.println("Socket Server Opened...");
 		launch(args);
 	}
