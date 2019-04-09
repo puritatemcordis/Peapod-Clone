@@ -315,7 +315,9 @@ public class peapod extends Application {
 		exitButton.setOnAction(new EventHandler <ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				
+				socketUtils.sendMessage("QUIT");
+				socketUtils.closeSocket();
+				System.out.println("Socket Server Closed...");
 				System.exit(0);
 			}		
 		});
@@ -846,12 +848,7 @@ public class peapod extends Application {
 											ButtonType.OK);
 									submitted.setTitle("Order Submitted!");
 									submitted.setHeaderText("Order Submitted");
-									submitted.showAndWait().ifPresent(resp -> {
-										socketUtils.sendMessage("QUIT");
-										socketUtils.closeSocket();
-										System.out.println("Socket Server Closed...");
-										System.exit(0);
-									});
+									submitted.showAndWait();
 								}
 							});
 						} else {
