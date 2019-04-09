@@ -5,11 +5,14 @@
 package peapod;
 
 import java.util.*;
+import java.util.stream.*;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import java.text.DecimalFormat;
+
+import javafx.stage.WindowEvent;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -75,6 +78,7 @@ public class peapod extends Application {
 	String selectedTime = ""; //selected delivery time 
 	String selectedDate = ""; //selected delivery date
 	TextField username = new TextField(); //username
+	boolean send = false; //boolean to send or not
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception{
@@ -88,6 +92,22 @@ public class peapod extends Application {
 		
 		window = primaryStage;
 		window.setTitle("PeaPod Clone");
+		
+		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() { 
+				@Override
+				public void handle(WindowEvent t) {
+					try {
+						socketUtils.sendMessage("QUIT");
+						socketUtils.closeSocket();
+						System.out.println("Socket Server Closed...");
+					}
+					catch (Exception e1) {
+						
+					}
+					Platform.exit();
+					System.exit(0);
+				}
+		});
 		
 //		Navbar 
 		VBox navbar = new VBox();
@@ -315,9 +335,14 @@ public class peapod extends Application {
 		exitButton.setOnAction(new EventHandler <ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				socketUtils.sendMessage("QUIT");
-				socketUtils.closeSocket();
-				System.out.println("Socket Server Closed...");
+				try {
+					socketUtils.sendMessage("QUIT");
+					socketUtils.closeSocket();
+					System.out.println("Socket Server Closed...");
+				}
+				catch (Exception e1) {
+					
+				}
 				System.exit(0);
 			}		
 		});
@@ -812,54 +837,73 @@ public class peapod extends Application {
 				checkout.setOnAction(new EventHandler<ActionEvent>() { 
 					@Override
 					public void handle(ActionEvent e) {
-						if(!username.getText().trim().isEmpty()) {
-							selectedTime = dateCB.getValue();
-							selectedDate = times.getSelectedToggle().getUserData().toString();
-							String selected = (String) times.getSelectedToggle().getUserData();
-							//order of order: action | username | truck # | muffins | salmon | asparagus | chicken | brussel sprouts | bread 
-							String order =  "TRANSACTION|"+ username.getText() + "|" + selected + "|" + userCart.values();
-							order = order.replace("[", "");
-							order = order.replace("]", "");
-							order = order.replace(",", "|");
-							order = order.replaceAll("\\s+", "");
-							System.out.println(order);
-							
-//							SOCKET CODE
-							socketUtils.sendMessage(order);
-							
-//							Confirmation
-							Alert confirmation = new Alert(
-									AlertType.CONFIRMATION,
-											"Username: " 	  + username.getText() 					   + "\n" + 
-											"Selected Time: " + selectedTime 	   					   + "\n" + 
-											"Selected Date: " + selectedDate 	   					   + "\n" +
-											"Cart: "		  + userCart		   					   + "\n" +
-											"Total: "		  + "$" + totalFormat.format(total)		   + "\n",
-									ButtonType.FINISH, ButtonType.CANCEL);
-							
-							confirmation.setTitle("Checkout Confirmation!");
-							confirmation.setHeaderText("Checkout Confirmation");
-							confirmation.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-							confirmation.showAndWait().ifPresent(response -> {
-								if(response == ButtonType.FINISH) {
-									Alert submitted = new Alert(
-											AlertType.NONE,
-											"Order Submitted!",
-											ButtonType.OK);
-									submitted.setTitle("Order Submitted!");
-									submitted.setHeaderText("Order Submitted");
-									submitted.showAndWait();
-								}
-							});
-						} else {
-							Alert loginerr = new Alert(
-									AlertType.ERROR,
-									"You must login to checkout!",
-									ButtonType.OK);
-							loginerr.setTitle("Login Error");
-							loginerr.setHeaderText("Login Error");
-							loginerr.showAndWait();
+						Collection<Integer> values = userCart.values();
+						int sum = 0;
+						for(int i : values) {
+							sum += i;
 						}
+						
+						if(sum == 0) {
+							Alert carterr = new Alert(
+									AlertType.ERROR,
+									"You must have at least one item in your cart!",
+									ButtonType.OK);
+							carterr.setTitle("Cart Error");
+							carterr.setHeaderText("Cart Error");
+							carterr.showAndWait();
+						}
+						else {
+							if(!username.getText().trim().isEmpty()) {
+								selectedTime = dateCB.getValue();
+								selectedDate = times.getSelectedToggle().getUserData().toString();
+								String selected = (String) times.getSelectedToggle().getUserData();
+								//order of order: action | username | truck # | muffins | salmon | asparagus | chicken | brussel sprouts | bread 
+								String order =  "TRANSACTION|"+ username.getText() + "|" + selected + "|" + userCart.values();
+								order = order.replace("[", "");
+								order = order.replace("]", "");
+								order = order.replace(",", "|");
+								order = order.replaceAll("\\s+", "");
+								System.out.println(order);
+								
+								
+//								Confirmation
+								Alert confirmation = new Alert(
+										AlertType.CONFIRMATION,
+												"Username: " 	  + username.getText() 					   + "\n" + 
+												"Selected Time: " + selectedTime 	   					   + "\n" + 
+												"Selected Date: " + selectedDate 	   					   + "\n" +
+												"Cart: "		  + userCart		   					   + "\n" +
+												"Total: "		  + "$" + totalFormat.format(total)		   + "\n",
+										ButtonType.FINISH, ButtonType.CANCEL);
+								
+								confirmation.setTitle("Checkout Confirmation!");
+								confirmation.setHeaderText("Checkout Confirmation");
+								confirmation.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+								confirmation.showAndWait().ifPresent(response -> {
+									if(response == ButtonType.FINISH) {
+										Alert submitted = new Alert(
+												AlertType.NONE,
+												"Order Submitted!",
+												ButtonType.OK);
+										submitted.setTitle("Order Submitted!");
+										submitted.setHeaderText("Order Submitted");
+										submitted.showAndWait();
+										send = true;
+									}
+								});
+								if(send) socketUtils.sendMessage(order);
+							} else {
+								Alert loginerr = new Alert(
+										AlertType.ERROR,
+										"You must login to checkout!",
+										ButtonType.OK);
+								loginerr.setTitle("Login Error");
+								loginerr.setHeaderText("Login Error");
+								loginerr.showAndWait();
+							}
+
+						}
+						
 					}
 				});
 				GridPane.setConstraints(checkout, 1, 2);
