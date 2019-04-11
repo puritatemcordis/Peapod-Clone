@@ -1,5 +1,5 @@
 //Zachary Dulac, Trung Nguyen, Abby Tse
-//TODO: DATE
+//29 April 2019
 //GUI Pea Pod Client Clone 
 
 package peapod;
@@ -55,33 +55,37 @@ import javafx.scene.layout.HBox;
 import javafx.beans.value.ChangeListener;
 
 public class peapod extends Application {
-	
-	//Declare a new fileIO for transaction log.
-	fileIO wrFile = new fileIO();
-	
-	Text clock;
 	Stage window;
+	static Text clock;
 	
-	int height = 1100;
-	int width = 853;
+	static int height = 1100; 	//height of the window
+	static int width = 853;		// width of the window
 	
-	double total = 0.00; //cart total
-	DecimalFormat totalFormat = new DecimalFormat("#0.00");
+	static int cNum = 0; 	// number of chicken
+	static int sNum = 0; 	// number of salmon
+	static int aNum = 0; 	// number of asparagus
+	static int bsNum = 0; 	// number of brussel sprouts
+	static int bNum = 0; 	// number of bread
+	static int mNum = 0; 	// number of muffins
 	
-	int cNum = 0; //number of chicken
-	int sNum = 0; //number of salmon
-	int aNum = 0; //number of asparagus
-	int bsNum = 0; //number of brussels sprouts
-	int bNum = 0; //number of bread
-	int mNum = 0; //number of muffins
+	static double total = 0.00; // integer type for cart total
+	static DecimalFormat totalFormat = new DecimalFormat("#0.00");
 	
-	String selectedTime = ""; //selected delivery time 
-	String selectedDate = ""; //selected delivery date
-	TextField username = new TextField(); //username
-	boolean send = false; //boolean to send or not
+	static Text cartTotal = new Text(); // text for cart total
+	static TextField username = new TextField();
+	
+	String selectedTime = ""; 	// selected delivery time 
+	String selectedDate = ""; 	// selected delivery date
+	boolean send = false; 		// boolean to verify transaction
+	
+	fileIO wrFile = new fileIO(); //Declare a new fileIO for transaction log.
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception{
+		window = primaryStage;
+		window.setTitle("PeaPod Clone");
+		
+		// hash table of the amount of items and types of items in the user's cart 
 		Map<String, Integer> userCart = new HashMap<String, Integer>();
 		userCart.put("Chicken", 0);
 		userCart.put("Salmon", 0);
@@ -90,9 +94,65 @@ public class peapod extends Application {
 		userCart.put("Bread", 0);
 		userCart.put("Muffins", 0);
 		
-		window = primaryStage;
-		window.setTitle("PeaPod Clone");
+		// Navbar -- requires the top of the men and bottom of the menu
+		HBox topMenu = components.topMenu();
+		HBox bottomMenu = new HBox();
+		bottomMenu.setStyle("-fx-font-weight: bold");
+		Button btn1 = components.btn1();
+		Button btn2 = components.btn2();
+		Button btn3 = components.btn3();
+		bottomMenu.getChildren().addAll(btn1, btn2, btn3);
 		
+		VBox navbar = new VBox(); 
+		navbar.getChildren().addAll(topMenu, bottomMenu);
+		
+		// Sidebar -- requires the protein, greens, and bakery vertical box and the exit button
+		VBox sidebar = new VBox();
+		sidebar.setStyle("-fx-border-color: black;" + "-fx-border-width: 3;");
+		sidebar.setMinWidth(.31*height);
+		
+		ImageView proteinV = components.proteinV();
+		ImageView greensV = components.greensV();
+		ImageView bakeryV = components.bakeryV();
+		
+		Button exitButton = new Button("Exit");
+		exitButton.setMinWidth(.33*height);
+		exitButton.setFont(Font.font("Verdana", 17));
+		
+		
+		sidebar.getChildren().addAll(proteinV, greensV, bakeryV, exitButton);
+		
+		// Center display		
+		ScrollPane sp = new ScrollPane();
+		
+		VBox center = components.center();
+		VBox chickenVB = food.chicken(cNum, userCart, cartTotal);
+		VBox salmonVB = food.salmon(sNum, userCart, cartTotal);
+		VBox asparagusVB = food.asparagus(aNum, userCart, cartTotal);
+		VBox bsVB = food.brusselsprouts(bsNum, userCart, cartTotal);
+		VBox breadVB = food.bread(bNum, userCart, cartTotal);
+		VBox muffinVB = food.muffin(mNum, userCart, cartTotal);
+		
+		// Border Pane -- wraps up the navbar, sidebar, and center display
+		BorderPane bp = new BorderPane();
+		bp.setTop(navbar);
+		bp.setLeft(sidebar);
+		bp.setCenter(center);
+		bp.setStyle("-fx-border-color: black;" + "-fx-border-width: 3;");
+		
+		refreshClock(); //constantly refreshes the clock
+		
+		// Scene Setup
+		Scene scene = new Scene(bp, height, width);
+		window.setScene(scene);
+		window.show();
+		
+		
+//================================================
+// BUTTON/ONCLICK FUNCTIONALITIES
+//================================================
+		
+		// sends the server a "QUIT" message, closes the socket, and exits the screen if user clicks "x" instead of exit
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() { 
 				@Override
 				public void handle(WindowEvent t) {
@@ -109,229 +169,7 @@ public class peapod extends Application {
 				}
 		});
 		
-//		Navbar 
-		VBox navbar = new VBox();
-		
-//		Top of the navbar
-		HBox topMenu = new HBox();
-		topMenu.setPadding(new Insets(20));
-		topMenu.setStyle("-fx-border-color: black;" + "-fx-border-width: 3;" + "-fx-background-color: white;");
-		
-		Text title = new Text("Peapod");
-		title.setFont(Font.font("Verdana", 40));
-		title.setStyle("-fx-font-weight: bold");
-		
-		Image logo = new Image("/resources/logo.png");
-		ImageView logoV = new ImageView(logo);
-		logoV.setFitWidth(100);
-		logoV.setPreserveRatio(true);
-		logoV.setSmooth(true);
-		logoV.setCache(true);
-		
-		Region r1 = new Region();
-		HBox.setHgrow(r1, Priority.ALWAYS);
-		
-//		TOP MIDDLE
-		StackPane clockSP = new StackPane();
-		clock = new Text();
-		clock.setFont(Font.font("Verdana", 20));
-		clock.setTextAlignment(TextAlignment.CENTER);
-		clockSP.getChildren().add(clock);
-		StackPane.setAlignment(clock, Pos.CENTER);
-		StackPane.setMargin(clock, new Insets(5, 0, 0, 0));
-		
-		Region r2 = new Region();
-		HBox.setHgrow(r2, Priority.ALWAYS);
-		
-//		TOP RIGHT
-		StackPane rightSP = new StackPane();
-		HBox right = new HBox(7);
-		
-		Image key = new Image("/resources/key.png");
-		ImageView keyV = new ImageView(key);
-		keyV.setFitWidth(30);
-		keyV.setPreserveRatio(true);
-		keyV.setSmooth(true);
-		keyV.setCache(true);
-		
-		//add button for login 
-		Button user    = new Button("Login");
-		user.setOnAction(new EventHandler<ActionEvent>()
-		{
-		    @Override public void handle(ActionEvent e)
-		    {   
-			// Create the custom dialog.
-			Dialog<Pair<String, String>> dialog = new Dialog<>();
-			dialog.setTitle("Login Dialog");
-			dialog.setHeaderText("Login");
-
-			// Set the button types.
-			ButtonType loginButtonType = new ButtonType("Login", ButtonData.OK_DONE);
-			dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
-
-			// Create the username and password labels and fields.
-			GridPane grid = new GridPane();
-			grid.setHgap(10);
-			grid.setVgap(10);
-			grid.setPadding(new Insets(20, 150, 10, 10));
-
-			username.setPromptText("Username");
-			PasswordField password = new PasswordField();
-			password.setPromptText("Password");
-
-			grid.add(new Label("Username:"), 0, 0);
-			grid.add(username, 1, 0);
-			grid.add(new Label("Password:"), 0, 1);
-			grid.add(password, 1, 1);
-
-			// Enable/Disable login button depending on whether a username was entered.
-			Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
-			loginButton.setDisable(true);
-
-			// Do some validation (using the Java 8 lambda syntax).
-			username.textProperty().addListener((observable, oldValue, newValue) -> {
-			    loginButton.setDisable(newValue.trim().isEmpty());
-			});
-
-			dialog.getDialogPane().setContent(grid);
-
-			// Request focus on the username field by default.
-			Platform.runLater(() -> username.requestFocus());
-
-			// Convert the result to a username-password-pair when the login button is clicked.
-			dialog.setResultConverter(dialogButton -> {
-			    if (dialogButton == loginButtonType) {
-			    	wrFile.wrTransactionData("LOGIN: " + username.getText() + " || " + password.getText());
-			    	return new Pair<>(username.getText(), password.getText());
-			    }
-			    return null;
-			});
-
-			Optional<Pair<String, String>> result = dialog.showAndWait();
-
-			boolean found = false;
-			String tempUsername = "";
-			String tempPassword = "";
-
-			try
-			{
-				Scanner x = new Scanner(new File("users.txt"));
-				x.useDelimiter("[,\n]");
-
-				while(x.hasNext() && !found)
-				{
-					tempUsername = x.next();
-					tempPassword = x.next();
-					
-					if(tempUsername.trim().equals(username.getText()) && tempPassword.trim().equals(password.getText()))
-					{
-						found = true;
-					}
-				}
-				x.close();
-			}
-			catch(Exception e1)
-			{
-				e1.printStackTrace();
-			}
-
-			if (found == true) {
-				user.setText(username.getText());
-				wrFile.wrTransactionData("LOGIN: SUCCESS");
-			}else {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("Error User Not Found!");
-				alert.setHeaderText("Error User Not Found!");
-				alert.setContentText("Please try again.");
-
-				alert.showAndWait();
-				wrFile.wrTransactionData("ERROR: USER NOT FOUND");
-			}
-
-		    }
-		});
-		
-		//Text user = new Text("Jane Doe");
-		//user.setFont(Font.font("Verdana", 20));
-		
-		Image cart = new Image("/resources/cart.png");
-		ImageView cartV = new ImageView(cart);
-		cartV.setStyle("-fx-padding: 50 0 0 0");
-		cartV.setFitWidth(30);
-		cartV.setPreserveRatio(true);
-		cartV.setSmooth(true);
-		cartV.setCache(true);
-		
-		Text cartTotal = new Text();
-		cartTotal.setText("$" + totalFormat.format(total));
-		cartTotal.setFont(Font.font("Verdana", 20));
-		
-		right.getChildren().addAll(keyV, user, cartV, cartTotal);
-		rightSP.getChildren().add(right);
-		StackPane.setAlignment(right, Pos.CENTER);
-		StackPane.setMargin(right, new Insets(17, 0, 0, 0));
-		
-		topMenu.getChildren().addAll(title, logoV, r1, clockSP, r2, rightSP);
-		
-//		Bottom of the navbar
-		HBox bottomMenu = new HBox();
-		bottomMenu.setStyle("-fx-font-weight: bold");
-		
-//		TODO: MAKE BUTTONS DYNAMICALLY CHANGE ACCORDING TO SCENE RATIO
-		Button btn1 = new Button("Home");
-		btn1.setMinSize(.333*height, 50);
-		btn1.setStyle("-fx-background-radius: 0;" + "-fx-background-color: white;" + "-fx-border-color: black;" + "-fx-border-width: 3;");
-		btn1.setFont(Font.font("Verdana", 17));
-		
-		
-		Button btn2 = new Button("Browse All Food");
-		btn2.setMinSize(.334*height, 50);
-		btn2.setStyle("-fx-background-radius: 0;" + "-fx-background-color: white;" + "-fx-border-color: black;" + "-fx-border-width: 3;");
-		btn2.setFont(Font.font("Verdana", 17));
-		
-		Button btn3 = new Button("Delivery Times");
-		btn3.setMinSize(.333*height, 50);
-		btn3.setStyle("-fx-background-radius: 0;" + "-fx-background-color: white;" + "-fx-border-color: black;" + "-fx-border-width: 3;");
-		btn3.setFont(Font.font("Verdana", 17));
-		
-		bottomMenu.getChildren().addAll(btn1, btn2, btn3);
-		
-		navbar.getChildren().addAll(topMenu, bottomMenu);
-		
-//		Sidebar
-//		TODO: ADD BORDERS TO IMAGES
-		VBox sidebar = new VBox();
-		sidebar.setStyle("-fx-border-color: black;" + "-fx-border-width: 3;");
-		sidebar.setMinWidth(.31*height);
-		
-		Image protein = new Image("/resources/protein.jpg");
-		ImageView proteinV = new ImageView(protein);
-//		proteinV.setStyle("-fx-border-color: black;" + "-fx-border-width: 3;");
-		proteinV.setFitWidth(.33*height);
-		proteinV.setFitHeight(190);
-//		proteinV.setPreserveRatio(true);
-		proteinV.setSmooth(true);
-		proteinV.setCache(true);
-		
-		Image greens = new Image("/resources/greens.jpg");
-		ImageView greensV = new ImageView(greens);
-//		greensV.setStyle("-fx-border-color: black;" + "-fx-border-width: 3;");
-		greensV.setFitWidth(.33*height);
-		greensV.setFitHeight(230);
-		greensV.setSmooth(true);
-		greensV.setCache(true);
-		
-		Image bakery = new Image("/resources/bakery.png");
-		ImageView bakeryV = new ImageView(bakery);
-//		bakeryV.setStyle("-fx-border-color: black;" + "-fx-border-width: 3;");
-		bakeryV.setFitWidth(.33*height);
-		bakeryV.setPreserveRatio(true);
-		bakeryV.setSmooth(true);
-		bakeryV.setCache(true);
-		
-		Button exitButton = new Button("Exit");
-		exitButton.setMinWidth(.33*height);
-		exitButton.setFont(Font.font("Verdana", 17));
+		// sends the server a "QUIT" message, closes the socket, and exits the screen if user clicks "EXIT"
 		exitButton.setOnAction(new EventHandler <ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -347,428 +185,16 @@ public class peapod extends Application {
 			}		
 		});
 		
-		sidebar.getChildren().addAll(proteinV, greensV, bakeryV, exitButton);
-		
-//		Center display
-//=====================
-//		MAIN PAGE
-//=====================
-		
-		VBox center = new VBox();
-		
-		Image main = new Image("/resources/main.png");
-		ImageView mainV = new ImageView(main);
-		mainV.setFitWidth(.666*height);
-		mainV.setFitHeight(500);
-		mainV.setSmooth(true);
-		mainV.setCache(true);
-		
-		StackPane greetingSP = new StackPane();
-		Text greeting = new Text("Welcome to Peapod\n" + "Free delivery with orders over $60");
-		greeting.setFont(Font.font("Verdana", 30));
-		greeting.setStyle("-fx-font-weight: bold;" + "-fx-border-color: black;" + "-fx-border-width: 3;");
-		greeting.setTextAlignment(TextAlignment.CENTER);
-		greetingSP.getChildren().add(greeting);
-		StackPane.setAlignment(greeting, Pos.CENTER);
-		StackPane.setMargin(greeting, new Insets(60, 0, 0, 0));	
-		
-		center.getChildren().addAll(mainV, greetingSP);
-	
-		ScrollPane sp = new ScrollPane();
-		GridPane allGP = new GridPane();
-		allGP.setPadding(new Insets(20, 60, 20, 60));
-		allGP.setVgap(8);
-		allGP.setHgap(40);
-//=====================
-//		PROTEIN 
-//=====================		
-//		PROTEIN - Chicken
-		VBox chickenVB = new VBox();
-		
-		Image chicken = new Image("/resources/chicken-t.png");
-		ImageView chickenV = new ImageView(chicken);
-		chickenV.setFitWidth(250);
-		chickenV.setPreserveRatio(true);
-		chickenV.setSmooth(true);
-		chickenV.setCache(true);
-		
-		StackPane chickenSP = new StackPane();
-		Text chickenDesc = new Text("Perdue Chicken Breasts\nBoneless Skinless Thin\nSliced - 5-6 ct Fresh\n$4.99");
-		chickenDesc.setFont(Font.font("Verdana", 20));
-		chickenDesc.setTextAlignment(TextAlignment.CENTER);
-		chickenSP.getChildren().add(chickenDesc);
-		StackPane.setAlignment(chickenDesc, Pos.CENTER);
-		
-		
-		HBox chickenHB = new HBox();
-		chickenHB.setSpacing(5);
-		
-		TextField chickenAmount = new TextField(String.valueOf(cNum));
-		chickenAmount.setEditable(false);
-		chickenAmount.setStyle("-fx-alignment: center");
-		chickenAmount.setFont(Font.font("Verdana", 15));
-		chickenAmount.setMaxWidth(60);
-		Button chickenD = new Button("-");
-		chickenD.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				if(cNum > 0) {
-					userCart.put("Chicken", userCart.get("Chicken")-1);
-					cNum--;
-					calculateAmount(cNum, 4.99, chickenAmount, cartTotal, '-');
-				}
-				wrFile.wrTransactionData("CHICKEN- || NEW: " + cNum);
-			}
-		});
-		chickenD.setPrefWidth(25);
-		Button chickenI = new Button("+");
-		chickenI.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				userCart.put("Chicken", userCart.get("Chicken")+1);
-				cNum++;
-				calculateAmount(cNum, 4.99, chickenAmount, cartTotal, '+');
-				wrFile.wrTransactionData("CHICKEN+ || NEW: " + cNum);
-			}
-		});
-		chickenI.setPrefWidth(25);
-		
-		Region cr1 = new Region();
-		HBox.setHgrow(cr1, Priority.ALWAYS);
-		Region cr2 = new Region();
-		HBox.setHgrow(cr2, Priority.ALWAYS);
-		
-		chickenHB.getChildren().addAll(cr1, chickenD, chickenAmount, chickenI, cr2);
-		
-		chickenVB.getChildren().addAll(chickenV, chickenSP, chickenHB);
-		
-//		PROTEIN - Salmon
-		VBox salmonVB = new VBox();
-		
-		Image salmon = new Image("/resources/salmon-t.png");
-		ImageView salmonV = new ImageView(salmon);
-		salmonV.setFitWidth(250);
-		salmonV.setPreserveRatio(true);
-		salmonV.setSmooth(true);
-		salmonV.setCache(true);
-		
-		StackPane salmonSP = new StackPane();
-		Text salmonDesc = new Text("Atlantic Salmon Fillets\nSkinless Farm-Raised Fresh\n$10.99");
-		salmonDesc.setFont(Font.font("Verdana", 20));
-		salmonDesc.setTextAlignment(TextAlignment.CENTER);
-		salmonSP.getChildren().add(salmonDesc);
-		StackPane.setAlignment(salmonDesc, Pos.CENTER);
-		
-		HBox salmonHB = new HBox();
-		salmonHB.setSpacing(5);
-		
-		TextField salmonAmount = new TextField(String.valueOf(sNum));
-		salmonAmount.setEditable(false);
-		salmonAmount.setStyle("-fx-alignment: center");
-		salmonAmount.setFont(Font.font("Verdana", 15));
-		salmonAmount.setMaxWidth(60);
-		Button salmonD = new Button("-");
-		salmonD.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				if(sNum > 0) {
-					userCart.put("Salmon", userCart.get("Salmon")-1);
-					sNum--;
-					calculateAmount(sNum, 10.99, salmonAmount, cartTotal, '-');
-				}
-				wrFile.wrTransactionData("SALMON- || NEW: " + sNum);
-			}
-		});
-		salmonD.setPrefWidth(25);
-		Button salmonI = new Button("+");
-		salmonI.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				userCart.put("Salmon", userCart.get("Salmon")+1);
-				sNum++;
-				calculateAmount(sNum, 10.99, salmonAmount, cartTotal, '+');
-				wrFile.wrTransactionData("SALMON+ || NEW: " + sNum);
-			}
-		});
-		salmonI.setPrefWidth(25);
-		
-		Region sr1 = new Region();
-		HBox.setHgrow(sr1, Priority.ALWAYS);
-		Region sr2 = new Region();
-		HBox.setHgrow(sr2, Priority.ALWAYS);
-		
-		salmonHB.getChildren().addAll(sr1, salmonD, salmonAmount, salmonI, sr2);
-		
-		salmonVB.getChildren().addAll(salmonV, salmonSP, salmonHB);
-		
-		
-//=====================
-//		VEGETABLES 
-//=====================
-//		VEGETABLES - Asparagus
-		VBox asparagusVB = new VBox();
-		
-		Image asparagus = new Image("/resources/asparagus.png");
-		ImageView asparagusV = new ImageView(asparagus);
-		asparagusV.setFitWidth(250);
-		asparagusV.setPreserveRatio(true);
-		asparagusV.setSmooth(true);
-		asparagusV.setCache(true);
-		
-		StackPane asparagusSP = new StackPane();
-		Text asparagusDesc = new Text("Asparagus\n$2.99");
-		asparagusDesc.setFont(Font.font("Verdana", 20));
-		asparagusDesc.setTextAlignment(TextAlignment.CENTER);
-		asparagusSP.getChildren().add(asparagusDesc);
-		StackPane.setAlignment(asparagusDesc, Pos.CENTER);
-		
-		HBox asparagusHB = new HBox();
-		asparagusHB.setSpacing(5);
-		
-		TextField asparagusAmount = new TextField(String.valueOf(aNum));
-		asparagusAmount.setEditable(false);
-		asparagusAmount.setStyle("-fx-alignment: center");
-		asparagusAmount.setFont(Font.font("Verdana", 15));
-		asparagusAmount.setMaxWidth(60);
-		Button asparagusD = new Button("-");
-		asparagusD.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				if(aNum > 0) {
-					userCart.put("Asparagus", userCart.get("Asparagus")-1);
-					aNum--;
-					calculateAmount(aNum, 2.99, asparagusAmount, cartTotal, '-');
-				}
-				wrFile.wrTransactionData("ASPARAGUS- || NEW: " + aNum);
-			}
-		});
-		asparagusD.setPrefWidth(25);
-		Button asparagusI = new Button("+");
-		asparagusI.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				userCart.put("Asparagus", userCart.get("Asparagus")+1);
-				aNum++;
-				calculateAmount(aNum, 2.99, asparagusAmount, cartTotal, '+');
-				wrFile.wrTransactionData("ASPARAGUS+ || NEW: " + aNum);
-			}
-		});
-		asparagusI.setPrefWidth(25);
-		
-		Region ar1 = new Region();
-		HBox.setHgrow(ar1, Priority.ALWAYS);
-		Region ar2 = new Region();
-		HBox.setHgrow(ar2, Priority.ALWAYS);
-		
-		asparagusHB.getChildren().addAll(ar1, asparagusD, asparagusAmount, asparagusI, ar2);
-		
-		asparagusVB.getChildren().addAll(asparagusV, asparagusSP, asparagusHB);
-		
-//		VEGETABLES - Brussel Sprouts
-		
-		VBox bsVB = new VBox();
-		
-		Image bs = new Image("/resources/brussel.png");
-		ImageView bsV = new ImageView(bs);
-		bsV.setFitWidth(250);
-		bsV.setPreserveRatio(true);
-		bsV.setSmooth(true);
-		bsV.setCache(true);
-		
-		StackPane bsSP = new StackPane();
-		Text bsDesc = new Text("Brussels Sprouts\n$2.50");
-		bsDesc.setFont(Font.font("Verdana", 20));
-		bsDesc.setTextAlignment(TextAlignment.CENTER);
-		bsSP.getChildren().add(bsDesc);
-		StackPane.setAlignment(bsDesc, Pos.CENTER);
-		
-		HBox bsHB = new HBox();
-		bsHB.setSpacing(5);
-		
-		TextField bsAmount = new TextField(String.valueOf(cNum));
-		bsAmount.setEditable(false);
-		bsAmount.setStyle("-fx-alignment: center");
-		bsAmount.setFont(Font.font("Verdana", 15));
-		bsAmount.setMaxWidth(60);
-		Button bsD = new Button("-");
-		bsD.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				if(bsNum > 0) {
-					userCart.put("Brussels Sprouts", userCart.get("Brussels Sprouts")-1);
-					bsNum--;
-					calculateAmount(bsNum, 2.50, bsAmount, cartTotal, '-');
-				}
-				wrFile.wrTransactionData("SPROUTS- || NEW: " + bsNum);
-			}
-		});
-		bsD.setPrefWidth(25);
-		Button bsI = new Button("+");
-		bsI.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				userCart.put("Brussels Sprouts", userCart.get("Brussels Sprouts")+1);
-				bsNum++;
-				calculateAmount(bsNum, 2.50, bsAmount, cartTotal, '+');
-				wrFile.wrTransactionData("SPROUTS+ || NEW: " + bsNum);
-			}
-		});
-		bsI.setPrefWidth(25);
-		
-		Region bsr1 = new Region();
-		HBox.setHgrow(bsr1, Priority.ALWAYS);
-		Region bsr2 = new Region();
-		HBox.setHgrow(bsr2, Priority.ALWAYS);
-		
-		bsHB.getChildren().addAll(bsr1, bsD, bsAmount, bsI, bsr2);
-		
-		bsVB.getChildren().addAll(bsV, bsSP, bsHB);
-		
-//		BAKERY - bread
-		VBox breadVB = new VBox();
-		
-		Image bread = new Image("/resources/bread.png");
-		ImageView breadV = new ImageView(bread);
-		breadV.setFitWidth(250);
-		breadV.setPreserveRatio(true);
-		breadV.setSmooth(true);
-		breadV.setCache(true);
-		
-		StackPane breadSP = new StackPane();
-		Text breadDesc = new Text("NY Brooklyn Bread\nHandmade Italian Loaf\n$1.99");
-		breadDesc.setFont(Font.font("Verdana", 20));
-		breadDesc.setTextAlignment(TextAlignment.CENTER);
-		breadSP.getChildren().add(breadDesc);
-		StackPane.setAlignment(breadDesc, Pos.CENTER);
-		
-		HBox breadHB = new HBox();
-		breadHB.setSpacing(5);
-		
-		TextField breadAmount = new TextField(String.valueOf(cNum));
-		breadAmount.setEditable(false);
-		breadAmount.setStyle("-fx-alignment: center");
-		breadAmount.setFont(Font.font("Verdana", 15));
-		breadAmount.setMaxWidth(60);
-		Button breadD = new Button("-");
-		breadD.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				if(bNum > 0) {
-					userCart.put("Bread", userCart.get("Bread")-1);
-					bNum--;
-					calculateAmount(bNum, 1.99, breadAmount, cartTotal, '-');
-				}
-				wrFile.wrTransactionData("BREAD- || NEW: " + bNum);
-			}
-		});
-		breadD.setPrefWidth(25);
-		Button breadI = new Button("+");
-		breadI.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				userCart.put("Bread", userCart.get("Bread")+1);
-				bNum++;
-				calculateAmount(bNum, 1.99, breadAmount, cartTotal, '+');
-				wrFile.wrTransactionData("BREAD+ || NEW: " + bNum);
-			}
-		});
-		breadI.setPrefWidth(25);
-		
-		Region br1 = new Region();
-		HBox.setHgrow(br1, Priority.ALWAYS);
-		Region br2 = new Region();
-		HBox.setHgrow(br2, Priority.ALWAYS);
-		
-		breadHB.getChildren().addAll(br1, breadD, breadAmount, breadI, br2);
-		
-		breadVB.getChildren().addAll(breadV, breadSP, breadHB);
-		
-//=====================
-//		BAKERY 
-//=====================
-//		BAKERY - muffin
-		VBox muffinVB = new VBox();
-		
-		Image muffin = new Image("/resources/muffin.png");
-		ImageView muffinV = new ImageView(muffin);
-		muffinV.setFitWidth(250);
-		muffinV.setPreserveRatio(true);
-		muffinV.setSmooth(true);
-		muffinV.setCache(true);
-		
-		StackPane muffinSP = new StackPane();
-		Text muffinDesc = new Text("Thomas' English Muffins\nOriginal - 6ct\n$3.69");
-		muffinDesc.setFont(Font.font("Verdana", 20));
-		muffinDesc.setTextAlignment(TextAlignment.CENTER);
-		muffinSP.getChildren().add(muffinDesc);
-		StackPane.setAlignment(muffinDesc, Pos.CENTER);
-		
-		HBox muffinHB = new HBox();
-		muffinHB.setSpacing(5);
-		
-		TextField muffinAmount = new TextField(String.valueOf(cNum));
-		muffinAmount.setEditable(false);
-		muffinAmount.setStyle("-fx-alignment: center");
-		muffinAmount.setFont(Font.font("Verdana", 15));
-		muffinAmount.setMaxWidth(60);
-		Button muffinD = new Button("-");
-		muffinD.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				if(mNum > 0) {
-					userCart.put("Muffins", userCart.get("Muffins")-1);
-					mNum--;
-					calculateAmount(mNum, 3.69, muffinAmount, cartTotal, '-');
-				}
-				wrFile.wrTransactionData("MUFFIN- || NEW: " + mNum);
-			}
-		});
-		muffinD.setPrefWidth(25);
-		Button muffinI = new Button("+");
-		muffinI.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent e) {
-				userCart.put("Muffins", userCart.get("Muffins")+1);
-				mNum++;
-				calculateAmount(mNum, 3.69, muffinAmount, cartTotal, '+');
-				wrFile.wrTransactionData("MUFFIN+ || NEW: " + mNum);
-			}
-		});
-		muffinI.setPrefWidth(25);
-		
-		Region mr1 = new Region();
-		HBox.setHgrow(mr1, Priority.ALWAYS);
-		Region mr2 = new Region();
-		HBox.setHgrow(mr2, Priority.ALWAYS);
-		
-		muffinHB.getChildren().addAll(mr1, muffinD, muffinAmount, muffinI, mr2);
-		
-		muffinVB.getChildren().addAll(muffinV, muffinSP, muffinHB);
-		
-//		Border Pane
-		BorderPane bp = new BorderPane();
-		bp.setTop(navbar);
-		bp.setLeft(sidebar);
-		bp.setCenter(center);
-		bp.setStyle("-fx-border-color: black;" + "-fx-border-width: 3;");
-		
-		refreshClock();
-		
-//		Scene Setup
-		Scene scene = new Scene(bp, height, width);
-		window.setScene(scene);
-		window.show();
-		
-//		BUTTONS TO CHANGE BORDERPANE
+		// button that returns the user to the original home menu
 		btn1.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent e) {
 				bp.setCenter(center);
 				window.setScene(scene);
-				wrFile.wrTransactionData("HOME");
 			}
 		});
 		
+		// button that sets the center border pane to all the different food items 
 		btn2.setOnAction(new EventHandler<ActionEvent>(){
 			@Override
 			public void handle(ActionEvent e) {
@@ -786,18 +212,14 @@ public class peapod extends Application {
 				GridPane.setConstraints(muffinVB, 1, 2);
 				
 				tempGP.getChildren().addAll(chickenVB, salmonVB, asparagusVB, bsVB, breadVB, muffinVB);
-				
 				sp.setContent(tempGP);
 				
 				bp.setCenter(sp);
 				window.setScene(scene);
-				wrFile.wrTransactionData("BROWSE ALL");
 			}
 		});
 		
-//=========================
-//		DELIVERY TIME
-//=========================
+		// button that sets the center border pane to the delivery time section
 		btn3.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
@@ -810,14 +232,14 @@ public class peapod extends Application {
 				Label dateLabel = new Label("Date:");
 				GridPane.setConstraints(dateLabel, 0, 0);
 				
-//				Date Choice Box
+				// Date Choice Box
 				ChoiceBox<String> dateCB = new ChoiceBox<>();
 				
 				dateCB.getItems().addAll("Monday, March 4", "Tuesday, March 5", "Wednesday, March 6", "Thursday, March 7", "Friday, March 8", "Saturday, March 9", "Sunday, March 10");
 				dateCB.setValue("Monday, March 4");
 				GridPane.setConstraints(dateCB, 1,0);
 				
-//				Times Radio Button
+				// Hours of the Day Radio Button
 				VBox radio = new VBox();
 				radio.setSpacing(5);
 				ToggleGroup times = new ToggleGroup();
@@ -833,6 +255,8 @@ public class peapod extends Application {
 				radio.getChildren().addAll(morning, noon, afternoon);
 				GridPane.setConstraints(radio, 1, 1);
 				
+				// Checkout button and the different alerts that checks to see if the user has logged in
+				// and have selected at least on item
 				Button checkout = new Button("Checkout");
 				checkout.setOnAction(new EventHandler<ActionEvent>() { 
 					@Override
@@ -843,6 +267,7 @@ public class peapod extends Application {
 							sum += i;
 						}
 						
+						// conditional to check if the cart has at least one item
 						if(sum == 0) {
 							Alert carterr = new Alert(
 									AlertType.ERROR,
@@ -853,10 +278,12 @@ public class peapod extends Application {
 							carterr.showAndWait();
 						}
 						else {
+							// conditional to check if the user is logged in
 							if(!username.getText().trim().isEmpty()) {
 								selectedTime = dateCB.getValue();
 								selectedDate = times.getSelectedToggle().getUserData().toString();
 								String selected = (String) times.getSelectedToggle().getUserData();
+								
 								//order of order: action | username | truck # | muffins | salmon | asparagus | chicken | brussel sprouts | bread 
 								String order =  "TRANSACTION|"+ username.getText() + "|" + selected + "|" + userCart.values();
 								order = order.replace("[", "");
@@ -866,7 +293,7 @@ public class peapod extends Application {
 								System.out.println(order);
 								
 								
-//								Confirmation
+								// Confirmation Alert
 								Alert confirmation = new Alert(
 										AlertType.CONFIRMATION,
 												"Username: " 	  + username.getText() 					   + "\n" + 
@@ -916,7 +343,7 @@ public class peapod extends Application {
 			}
 		});
 		
-//		IMAGEVIEW FROM SIDEBAR TO CHANGE BORDERPANE
+		// ImageView from sidebar that changes the center border pane to ONLY protein options
 		proteinV.setOnMouseClicked(e->{
 			GridPane proteinGP = new GridPane();
 			proteinGP.setPadding(new Insets(20, 60, 20, 60));
@@ -932,10 +359,9 @@ public class peapod extends Application {
 			
 			bp.setCenter(sp);
 			window.setScene(scene);
-			
-			wrFile.wrTransactionData("PROTEIN");
 		});
 		
+		// ImageView from sidebar that changes the center border pane to ONLY vegetable options
 		greensV.setOnMouseClicked(e->{
 			GridPane greensGP = new GridPane();
 			greensGP.setPadding(new Insets(20, 60, 20, 60));
@@ -951,10 +377,9 @@ public class peapod extends Application {
 			
 			bp.setCenter(sp);
 			window.setScene(scene);
-			
-			wrFile.wrTransactionData("VEGETABLES");
 		});
 		
+		// ImageView from sidebar that changes the center border pane to ONLY bakery options
 		bakeryV.setOnMouseClicked(e->{
 			GridPane bakeryGP = new GridPane();
 			bakeryGP.setPadding(new Insets(20, 60, 20, 60));
@@ -971,12 +396,11 @@ public class peapod extends Application {
 			bp.setCenter(sp);
 			window.setScene(scene);
 			
-			wrFile.wrTransactionData("BAKERY");
 		});
 	}
 	
-// Calculate total and amount of item
-	private void calculateAmount(int itemAmount, double price, TextField textAmount, Text cartTotal, char sign) {
+	// Calculate total and amount of item -- used in food.java
+	public static void calculateAmount(int itemAmount, double price, TextField textAmount, Text cartTotal, char sign) {
 		if(sign == '+') total += price;
 		else total -= price;
 		
@@ -1018,10 +442,8 @@ public class peapod extends Application {
     }
 
 	public static void main(String[] args) {
-//		OPENS SOCKET SEREVER
-		socketUtils.socketConnect();
+		socketUtils.socketConnect(); // opens socket server
 		System.out.println("Socket Server Opened...");
 		launch(args);
 	}
-
 }
