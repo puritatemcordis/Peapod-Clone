@@ -35,6 +35,7 @@ public class socketUtils
                portString = br.readLine();
            
                portNumber = Integer.parseInt(portString);
+               System.out.println(ipAddress);
                br.close();
 	        }
 	        else

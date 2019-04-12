@@ -1,6 +1,9 @@
 package peapod;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -138,20 +141,18 @@ public class components {
 
 			try
 			{
-				Scanner x = new Scanner(new File("users.txt"));
-				x.useDelimiter("[,\n]");
-
-				while(x.hasNext() && !found)
-				{
-					tempUsername = x.next();
-					tempPassword = x.next();
-					
-					if(tempUsername.trim().equals(peapod.username.getText()) && tempPassword.trim().equals(password.getText()))
-					{
+				InputStream inputStream = old_peapod.class.getResourceAsStream("users.txt");
+				InputStreamReader inputReader = new InputStreamReader(inputStream);
+				BufferedReader reader = new BufferedReader(inputReader);
+				String line = null;
+				while((line = reader.readLine()) != null) {
+					String[] login = line.replaceAll("\\s+","").split(",");
+					tempUsername = login[0];
+					tempPassword = login[1];
+					if(tempUsername.trim().equals(peapod.username.getText()) && tempPassword.trim().equals(password.getText())){
 						found = true;
 					}
 				}
-				x.close();
 			}
 			catch(Exception e1)
 			{

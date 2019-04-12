@@ -7,7 +7,12 @@ package peapod;
 import java.util.*;
 import java.util.stream.*;
 
+import javax.annotation.Resource;
+
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.util.concurrent.TimeUnit;
 
 import java.text.DecimalFormat;
@@ -215,20 +220,36 @@ public class old_peapod extends Application {
 
 			try
 			{
-				Scanner x = new Scanner(new File("users.txt"));
-				x.useDelimiter("[,\n]");
-
-				while(x.hasNext() && !found)
-				{
-					tempUsername = x.next();
-					tempPassword = x.next();
-					
-					if(tempUsername.trim().equals(username.getText()) && tempPassword.trim().equals(password.getText()))
-					{
+//				METHOD 1
+				InputStream inputStream = old_peapod.class.getResourceAsStream("users.txt");
+				InputStreamReader inputReader = new InputStreamReader(inputStream);
+				BufferedReader reader = new BufferedReader(inputReader);
+				String line = null;
+				while((line = reader.readLine()) != null) {
+					String[] login = line.replaceAll("\\s+","").split(",");
+					tempUsername = login[0];
+					tempPassword = login[1];
+					if(tempUsername.trim().equals(username.getText()) && tempPassword.trim().equals(password.getText())){
 						found = true;
 					}
 				}
-				x.close();
+				
+//				METHOD 2
+//				File file = new File(System.getProperty("user.dir") + "/src/resources/users.txt");
+//				Scanner x = new Scanner(file);
+//				x.useDelimiter("[,\n]");
+//
+//				while(x.hasNext() && !found)
+//				{
+//					tempUsername = x.next();
+//					tempPassword = x.next();
+//					
+//					if(tempUsername.trim().equals(username.getText()) && tempPassword.trim().equals(password.getText()))
+//					{
+//						found = true;
+//					}
+//				}
+//				x.close();
 			}
 			catch(Exception e1)
 			{
