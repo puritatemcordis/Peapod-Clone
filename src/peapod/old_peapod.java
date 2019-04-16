@@ -191,7 +191,7 @@ public class old_peapod extends Application {
 
 			// Enable/Disable login button depending on whether a username was entered.
 			Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
-			loginButton.setDisable(true);
+			loginButton.setDisable(false);
 
 			// Do some validation (using the Java 8 lambda syntax).
 			username.textProperty().addListener((observable, oldValue, newValue) -> {
