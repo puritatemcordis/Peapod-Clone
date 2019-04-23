@@ -26,17 +26,14 @@ public class socketUtils
 		try 
 		{
 //			config.txt must be outside of package, but inside source
-			File file = new File("config.txt");
-	        if (file.exists())
+//			File file = new File("config.txt");
+	        if (!peapod.ipAddress.getText().trim().isEmpty())
 	        {
-	           BufferedReader br = new BufferedReader(new FileReader("config.txt"));
-	           
-               ipAddress  = br.readLine();
-               portString = br.readLine();
+               ipAddress  = peapod.ipAddress.getText();
+               portString = peapod.portNum.getText();
            
                portNumber = Integer.parseInt(portString);
                System.out.println(ipAddress);
-               br.close();
 	        }
 	        else
 	        {

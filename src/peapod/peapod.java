@@ -73,6 +73,8 @@ public class peapod extends Application {
 	
 	static Text cartTotal = new Text(); // text for cart total
 	static TextField username = new TextField();
+	static TextField ipAddress = new TextField();
+	static TextField portNum = new TextField();
 	
 	String selectedTime = ""; 	// selected delivery time 
 	String selectedDate = ""; 	// selected delivery date
@@ -442,8 +444,6 @@ public class peapod extends Application {
     }
 
 	public static void main(String[] args) {
-		socketUtils.socketConnect(); // opens socket server
-		System.out.println("Socket Server Opened...");
 		launch(args);
 	}
 }

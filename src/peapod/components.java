@@ -104,11 +104,17 @@ public class components {
 			peapod.username.setPromptText("Username");
 			PasswordField password = new PasswordField();
 			password.setPromptText("Password");
+			peapod.ipAddress.setPromptText("10.10.3.150");
+			peapod.portNum.setPromptText("3333");
 
 			grid.add(new Label("Username:"), 0, 0);
 			grid.add(peapod.username, 1, 0);
 			grid.add(new Label("Password:"), 0, 1);
 			grid.add(password, 1, 1);
+			grid.add(new Label("IP Address:"), 0, 2);
+			grid.add(peapod.ipAddress, 1, 2);
+			grid.add(new Label("Port Number:"), 0, 3);
+			grid.add(peapod.portNum, 1, 3);
 
 			// Enable/Disable login button depending on whether a username was entered.
 			Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
@@ -161,6 +167,8 @@ public class components {
 
 			if (found == true) {
 				user.setText(peapod.username.getText());
+				socketUtils.socketConnect(); // opens socket server
+				System.out.println("Socket Server Opened...");
 //				wrFile.wrTransactionData("LOGIN: SUCCESS");
 			}else {
 				Alert alert = new Alert(AlertType.ERROR);
