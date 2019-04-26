@@ -36,6 +36,8 @@ import javafx.util.Pair;
 
 public class components {
 	
+	static boolean found = false; // boolean for login
+	
 	// Top of the navbar
 	public static HBox topMenu() {
 		HBox topMenu = new HBox();
@@ -85,101 +87,101 @@ public class components {
 		user.setOnAction(new EventHandler<ActionEvent>()
 		{
 		    @Override public void handle(ActionEvent e)
-		    {   
-			// Create the custom dialog.
-			Dialog<Pair<String, String>> dialog = new Dialog<>();
-			dialog.setTitle("Login Dialog");
-			dialog.setHeaderText("Login");
+		    {
+		    if(!found) {
+		    	// Create the custom dialog.
+				Dialog<Pair<String, String>> dialog = new Dialog<>();
+				dialog.setTitle("Login Dialog");
+				dialog.setHeaderText("Login");
 
-			// Set the button types.
-			ButtonType loginButtonType = new ButtonType("Login", ButtonData.OK_DONE);
-			dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+				// Set the button types.
+				ButtonType loginButtonType = new ButtonType("Login", ButtonData.OK_DONE);
+				dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
 
-			// Create the username and password labels and fields.
-			GridPane grid = new GridPane();
-			grid.setHgap(10);
-			grid.setVgap(10);
-			grid.setPadding(new Insets(20, 150, 10, 10));
+				// Create the username and password labels and fields.
+				GridPane grid = new GridPane();
+				grid.setHgap(10);
+				grid.setVgap(10);
+				grid.setPadding(new Insets(20, 150, 10, 10));
 
-			peapod.username.setPromptText("Username");
-			PasswordField password = new PasswordField();
-			password.setPromptText("Password");
-			peapod.ipAddress.setPromptText("10.10.3.150");
-			peapod.portNum.setPromptText("3333");
+				peapod.username.setPromptText("Username");
+				PasswordField password = new PasswordField();
+				password.setPromptText("Password");
+				peapod.ipAddress.setPromptText("10.10.3.150");
+				peapod.portNum.setPromptText("3333");
 
-			grid.add(new Label("Username:"), 0, 0);
-			grid.add(peapod.username, 1, 0);
-			grid.add(new Label("Password:"), 0, 1);
-			grid.add(password, 1, 1);
-			grid.add(new Label("IP Address:"), 0, 2);
-			grid.add(peapod.ipAddress, 1, 2);
-			grid.add(new Label("Port Number:"), 0, 3);
-			grid.add(peapod.portNum, 1, 3);
+				grid.add(new Label("Username:"), 0, 0);
+				grid.add(peapod.username, 1, 0);
+				grid.add(new Label("Password:"), 0, 1);
+				grid.add(password, 1, 1);
+				grid.add(new Label("IP Address:"), 0, 2);
+				grid.add(peapod.ipAddress, 1, 2);
+				grid.add(new Label("Port Number:"), 0, 3);
+				grid.add(peapod.portNum, 1, 3);
 
-			// Enable/Disable login button depending on whether a username was entered.
-			Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
-			loginButton.setDisable(false);
+				// Enable/Disable login button depending on whether a username was entered.
+				Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
+				loginButton.setDisable(false);
 
-			// Do some validation (using the Java 8 lambda syntax).
-			peapod.username.textProperty().addListener((observable, oldValue, newValue) -> {
-			    loginButton.setDisable(newValue.trim().isEmpty());
-			});
+				// Do some validation (using the Java 8 lambda syntax).
+				peapod.username.textProperty().addListener((observable, oldValue, newValue) -> {
+				    loginButton.setDisable(newValue.trim().isEmpty());
+				});
 
-			dialog.getDialogPane().setContent(grid);
+				dialog.getDialogPane().setContent(grid);
 
-			// Request focus on the username field by default.
-			Platform.runLater(() -> peapod.username.requestFocus());
+				// Request focus on the username field by default.
+				Platform.runLater(() -> peapod.username.requestFocus());
 
-			// Convert the result to a username-password-pair when the login button is clicked.
-			dialog.setResultConverter(dialogButton -> {
-			    if (dialogButton == loginButtonType) {
-//			    	wrFile.wrTransactionData("LOGIN: " + username.getText() + " || " + password.getText());
-			    	return new Pair<>(peapod.username.getText(), password.getText());
-			    }
-			    return null;
-			});
+				// Convert the result to a username-password-pair when the login button is clicked.
+				dialog.setResultConverter(dialogButton -> {
+				    if (dialogButton == loginButtonType) {
+//				    	wrFile.wrTransactionData("LOGIN: " + username.getText() + " || " + password.getText());
+				    	return new Pair<>(peapod.username.getText(), password.getText());
+				    }
+				    return null;
+				});
 
-			Optional<Pair<String, String>> result = dialog.showAndWait();
+				Optional<Pair<String, String>> result = dialog.showAndWait();
 
-			boolean found = false;
-			String tempUsername = "";
-			String tempPassword = "";
+				String tempUsername = "";
+				String tempPassword = "";
 
-			try
-			{
-				InputStream inputStream = old_peapod.class.getResourceAsStream("users.txt");
-				InputStreamReader inputReader = new InputStreamReader(inputStream);
-				BufferedReader reader = new BufferedReader(inputReader);
-				String line = null;
-				while((line = reader.readLine()) != null) {
-					String[] login = line.replaceAll("\\s+","").split(",");
-					tempUsername = login[0];
-					tempPassword = login[1];
-					if(tempUsername.trim().equals(peapod.username.getText()) && tempPassword.trim().equals(password.getText())){
-						found = true;
+				try
+				{
+					InputStream inputStream = old_peapod.class.getResourceAsStream("users.txt");
+					InputStreamReader inputReader = new InputStreamReader(inputStream);
+					BufferedReader reader = new BufferedReader(inputReader);
+					String line = null;
+					while((line = reader.readLine()) != null) {
+						String[] login = line.replaceAll("\\s+","").split(",");
+						tempUsername = login[0];
+						tempPassword = login[1];
+						if(tempUsername.trim().equals(peapod.username.getText()) && tempPassword.trim().equals(password.getText())){
+							found = true;
+						}
 					}
 				}
-			}
-			catch(Exception e1)
-			{
-				e1.printStackTrace();
-			}
+				catch(Exception e1)
+				{
+					e1.printStackTrace();
+				}
 
-			if (found == true) {
-				user.setText(peapod.username.getText());
-				socketUtils.socketConnect(); // opens socket server
-				System.out.println("Socket Server Opened...");
-//				wrFile.wrTransactionData("LOGIN: SUCCESS");
-			}else {
-				Alert alert = new Alert(AlertType.ERROR);
-				alert.setTitle("Error User Not Found!");
-				alert.setHeaderText("Error User Not Found!");
-				alert.setContentText("Please try again.");
+				if (found == true) {
+					user.setText(peapod.username.getText());
+					socketUtils.socketConnect(); // opens socket server
+					System.out.println("Socket Server Opened...");
+//					wrFile.wrTransactionData("LOGIN: SUCCESS");
+				}else {
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("Error User Not Found!");
+					alert.setHeaderText("Error User Not Found!");
+					alert.setContentText("Please try again.");
 
-				alert.showAndWait();
-//				wrFile.wrTransactionData("ERROR: USER NOT FOUND");
-			}
-
+					alert.showAndWait();
+//					wrFile.wrTransactionData("ERROR: USER NOT FOUND");
+				}
+		    }
 		    }
 		});
 		
