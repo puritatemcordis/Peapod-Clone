@@ -9,6 +9,11 @@ import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert.AlertType;
+
 import java.net.InetAddress;
 
 public class socketUtils 
@@ -78,6 +83,15 @@ public class socketUtils
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Alert loginerr = new Alert(
+					AlertType.ERROR,
+					"SERVERS COULD NOT BE REACHED",
+					ButtonType.OK);
+			loginerr.setTitle("Disconnect Error");
+			loginerr.setHeaderText("Disconnect Error");
+			loginerr.showAndWait();
+			
+			peapod.send = false;
 		}
 		
 		return rc;

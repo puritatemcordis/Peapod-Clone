@@ -78,14 +78,17 @@ public class peapod extends Application {
 	
 	String selectedTime = ""; 	// selected delivery time 
 	String selectedDate = ""; 	// selected delivery date
-	boolean send = false; 		// boolean to verify transaction
+	String selectedDelivery = ""; //selected type of delivery
+	static boolean send = true; 		// boolean to verify transaction
+	
+	String order;
 	
 	fileIO wrFile = new fileIO(); //Declare a new fileIO for transaction log.
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception{
 		window = primaryStage;
-		window.setTitle("PeaPod Clone");
+		window.setTitle("PeaPod Client");
 		
 		// hash table of the amount of items and types of items in the user's cart 
 		Map<String, Integer> userCart = new HashMap<String, Integer>();
@@ -256,9 +259,23 @@ public class peapod extends Application {
 				afternoon.setUserData("3");
 				radio.getChildren().addAll(morning, noon, afternoon);
 				GridPane.setConstraints(radio, 1, 1);
+				morning.setSelected(true);
+				
+				VBox radio1 = new VBox();
+				radio1.setSpacing(5);
+				ToggleGroup choice = new ToggleGroup();
+				RadioButton res = new RadioButton("Residential Delivery");
+				res.setToggleGroup(choice);
+				res.setUserData("1");
+				RadioButton bus = new RadioButton("Business Delivery");
+				bus.setToggleGroup(choice);
+				bus.setUserData("2");
+				radio1.getChildren().addAll(res, bus);
+				GridPane.setConstraints(radio1, 1, 2);
+				res.setSelected(true);
 				
 				// Checkout button and the different alerts that checks to see if the user has logged in
-				// and have selected at least on item
+				// and have selected at least one item
 				Button checkout = new Button("Checkout");
 				checkout.setOnAction(new EventHandler<ActionEvent>() { 
 					@Override
@@ -284,10 +301,14 @@ public class peapod extends Application {
 							if(!username.getText().trim().isEmpty()) {
 								selectedTime = dateCB.getValue();
 								selectedDate = times.getSelectedToggle().getUserData().toString();
+								selectedDelivery = choice.getSelectedToggle().getUserData().toString();
+								if(selectedDelivery == "1") selectedDelivery = "Residential Delivery";
+								else if (selectedDelivery == "2") selectedDelivery = "Business Delivery";
 								String selected = (String) times.getSelectedToggle().getUserData();
+								String deliv = (String) choice.getSelectedToggle().getUserData();
 								
-								//order of order: action | username | truck # | muffins | salmon | asparagus | chicken | brussel sprouts | bread 
-								String order =  "TRANSACTION|"+ username.getText() + "|" + selected + "|" + userCart.values();
+								//order of order: action | username | truck # | muffins | salmon | asparagus | chicken | brussel sprouts | bread | delivery type
+								order =  "TRANSACTION|"+ username.getText() + "|" + selected + "|" + userCart.values() + "|" + deliv;
 								order = order.replace("[", "");
 								order = order.replace("]", "");
 								order = order.replace(",", "|");
@@ -302,25 +323,30 @@ public class peapod extends Application {
 												"Selected Time: " + selectedTime 	   					   + "\n" + 
 												"Selected Date: " + selectedDate 	   					   + "\n" +
 												"Cart: "		  + userCart		   					   + "\n" +
-												"Total: "		  + "$" + totalFormat.format(total)		   + "\n",
+												"Total: "		  + "$" + totalFormat.format(total)		   + "\n" +
+												"Delivery: "	  + selectedDelivery 					   + "\n", 
 										ButtonType.FINISH, ButtonType.CANCEL);
 								
 								confirmation.setTitle("Checkout Confirmation!");
 								confirmation.setHeaderText("Checkout Confirmation");
 								confirmation.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+								
 								confirmation.showAndWait().ifPresent(response -> {
 									if(response == ButtonType.FINISH) {
-										Alert submitted = new Alert(
-												AlertType.NONE,
-												"Order Submitted!",
-												ButtonType.OK);
-										submitted.setTitle("Order Submitted!");
-										submitted.setHeaderText("Order Submitted");
-										submitted.showAndWait();
-										send = true;
+										/*if(send)*/ socketUtils.sendMessage(order);
+										if(send == true) {
+											Alert submitted = new Alert(
+													AlertType.NONE,
+													"Order Submitted!",
+													ButtonType.OK);
+											submitted.setTitle("Order Submitted!");
+											submitted.setHeaderText("Order Submitted");
+											submitted.showAndWait();
+											//send = true;
+										}
 									}
 								});
-								if(send) socketUtils.sendMessage(order);
+
 							} else {
 								Alert loginerr = new Alert(
 										AlertType.ERROR,
@@ -335,9 +361,9 @@ public class peapod extends Application {
 						
 					}
 				});
-				GridPane.setConstraints(checkout, 1, 2);
+				GridPane.setConstraints(checkout, 1, 3);
 
-				deliveryGP.getChildren().addAll(dateLabel, dateCB, radio, checkout);
+				deliveryGP.getChildren().addAll(dateLabel, dateCB, radio, radio1, checkout);
 				deliverySP.setContent(deliveryGP);
 				
 				bp.setCenter(deliverySP);
